@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>雲端授權維運索引 | Adobe · Google Workspace · Microsoft 365</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Noto+Sans+TC:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F1F4EF;
+    --surface:#FFFFFF;
+    --ink:#161F19;
+    --ink-soft:#4B564E;
+    --line:#D7DED2;
+    --accent:#2B3FE0;
+    --accent-soft:#E7E9FB;
+    --adobe:#DA1F26;
+    --gws-a:#4285F4; --gws-b:#EA4335; --gws-c:#FBBC05; --gws-d:#34A853;
+    --m365:#0F6CBD;
+    --radius:14px;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Noto Sans TC','IBM Plex Sans',system-ui,sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  .mono{font-family:'IBM Plex Mono',ui-monospace,monospace;}
+  .display{font-family:'Space Grotesk','Noto Sans TC',sans-serif;}
+  a{color:inherit;}
+
+  /* ---------- header ---------- */
+  header.top{
+    position:sticky; top:0; z-index:40;
+    background:rgba(241,244,239,0.92);
+    backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--line);
+  }
+  .top-inner{
+    max-width:1180px; margin:0 auto;
+    padding:18px 24px 16px;
+  }
+  .eyebrow{
+    font-size:11px; letter-spacing:.14em; text-transform:uppercase;
+    color:var(--ink-soft); margin-bottom:8px; display:flex; gap:10px; align-items:center;
+  }
+  .eyebrow .dot{width:6px;height:6px;border-radius:50%;background:var(--accent);}
+  h1.display{
+    font-size:26px; font-weight:700; margin:0 0 4px; letter-spacing:-.01em;
+  }
+  .sub{color:var(--ink-soft); font-size:14.5px; margin:0 0 16px; max-width:640px; line-height:1.6;}
+
+  .searchbar{
+    display:flex; align-items:center; gap:10px;
+    background:var(--surface); border:1.5px solid var(--line);
+    border-radius:11px; padding:11px 14px;
+    max-width:640px;
+    transition:border-color .15s, box-shadow .15s;
+  }
+  .searchbar:focus-within{border-color:var(--accent); box-shadow:0 0 0 4px var(--accent-soft);}
+  .searchbar .prompt{color:var(--accent); font-weight:600; font-size:14px;}
+  .searchbar input{
+    border:none; outline:none; flex:1; font-size:14.5px;
+    background:transparent; color:var(--ink); font-family:'IBM Plex Mono',monospace;
+  }
+  .searchbar input::placeholder{color:#98A399;}
+  .search-count{font-size:12px; color:var(--ink-soft); white-space:nowrap;}
+
+  /* vendor chip filter row */
+  .chiprow{display:flex; gap:8px; margin-top:12px; flex-wrap:wrap;}
+  .chip{
+    display:inline-flex; align-items:center; gap:6px;
+    border:1px solid var(--line); background:var(--surface);
+    border-radius:999px; padding:6px 12px; font-size:12.5px; cursor:pointer;
+    user-select:none; transition:all .15s;
+  }
+  .chip .sw{width:8px;height:8px;border-radius:50%;}
+  .chip[data-active="true"]{border-color:var(--accent); background:var(--accent-soft); color:var(--accent);}
+  .chip:hover{border-color:var(--accent);}
+
+  /* ---------- layout ---------- */
+  .wrap{max-width:1180px; margin:0 auto; padding:28px 24px 90px; display:grid; grid-template-columns:230px 1fr; gap:36px;}
+  @media (max-width:860px){ .wrap{grid-template-columns:1fr;} }
+
+  nav.rail{position:sticky; top:158px; align-self:start; max-height:calc(100vh - 180px); overflow:auto;}
+  @media (max-width:860px){ nav.rail{position:static; max-height:none; margin-bottom:8px;} }
+  .rail-group{margin-bottom:18px;}
+  .rail-vendor{
+    display:flex; align-items:center; gap:8px;
+    font-weight:700; font-size:13.5px; margin-bottom:6px;
+  }
+  .rail-vendor .sw{width:9px;height:9px;border-radius:3px;}
+  .rail-part{
+    display:block; font-size:12.5px; color:var(--ink-soft);
+    padding:5px 0 5px 17px; border-left:1.5px solid var(--line);
+    text-decoration:none; line-height:1.4;
+  }
+  .rail-part.active{color:var(--accent); border-left-color:var(--accent); font-weight:600;}
+  .rail-part:hover{color:var(--ink);}
+
+  main{min-width:0;}
+  section.vendor-section{margin-bottom:44px; scroll-margin-top:150px;}
+  .vendor-head{
+    display:flex; align-items:baseline; gap:12px; margin-bottom:4px;
+    padding-bottom:14px; border-bottom:2px solid var(--ink);
+  }
+  .vendor-head .sw{width:13px;height:13px;border-radius:4px; flex:none;}
+  .vendor-head h2{font-size:21px; margin:0;}
+  .vendor-head .tag{font-size:11px; color:var(--ink-soft); margin-left:auto;}
+
+  .part-group{margin-top:26px; scroll-margin-top:150px;}
+  .part-title{
+    font-size:13px; font-weight:700; color:var(--ink-soft);
+    text-transform:uppercase; letter-spacing:.06em; margin:0 0 12px;
+  }
+
+  .qa-card{
+    background:var(--surface); border:1px solid var(--line); border-radius:var(--radius);
+    padding:18px 20px; margin-bottom:12px; position:relative;
+    scroll-margin-top:150px;
+  }
+  .qa-card.hidden{display:none;}
+  .qa-top{display:flex; align-items:flex-start; gap:12px;}
+  .qa-id{
+    font-size:11px; color:var(--accent); background:var(--accent-soft);
+    border-radius:6px; padding:3px 7px; flex:none; margin-top:2px;
+  }
+  .qa-q{font-weight:700; font-size:15px; line-height:1.5; margin:0; flex:1;}
+  .qa-a{font-size:14px; color:#2C362F; line-height:1.8; margin:10px 0 0 0;}
+  .qa-a ul{margin:6px 0; padding-left:20px;}
+  .qa-a li{margin:3px 0;}
+  .qa-foot{display:flex; justify-content:flex-end; margin-top:10px;}
+  .copy-btn{
+    font-size:11.5px; color:var(--ink-soft); background:none; border:1px solid var(--line);
+    border-radius:7px; padding:4px 9px; cursor:pointer; font-family:inherit;
+    display:flex; align-items:center; gap:5px;
+  }
+  .copy-btn:hover{border-color:var(--accent); color:var(--accent);}
+  mark{background:#FDE68A; color:inherit; border-radius:3px; padding:0 1px;}
+
+  /* table blocks */
+  .table-card{
+    background:var(--surface); border:1px solid var(--line); border-radius:var(--radius);
+    padding:20px; margin-bottom:12px; overflow:auto; scroll-margin-top:150px;
+  }
+  .table-card.hidden{display:none;}
+  .table-card h4{margin:0 0 12px; font-size:14.5px;}
+  table{border-collapse:collapse; width:100%; font-size:13px; min-width:520px;}
+  th,td{border:1px solid var(--line); padding:9px 11px; text-align:left;}
+  th{background:#F6F8F4; font-weight:700; font-size:12.5px;}
+  td.yes{color:#1E7F3B; font-weight:600;}
+  td.no{color:#B23A2E;}
+
+  .empty-state{
+    text-align:center; padding:60px 20px; color:var(--ink-soft);
+    display:none;
+  }
+  .empty-state.show{display:block;}
+
+  .toast{
+    position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(20px);
+    background:var(--ink); color:#fff; padding:10px 18px; border-radius:999px;
+    font-size:13px; opacity:0; pointer-events:none; transition:all .25s;
+    z-index:60;
+  }
+  .toast.show{opacity:1; transform:translateX(-50%) translateY(0);}
+
+  footer{
+    max-width:1180px; margin:0 auto; padding:0 24px 50px; color:var(--ink-soft); font-size:12.5px;
+  }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <div class="eyebrow"><span class="dot"></span>IT 維運知識庫 · 客戶自助查詢</div>
+    <h1 class="display">雲端授權維運索引</h1>
+    <p class="sub">Adobe Creative Cloud、Google Workspace、Microsoft 365 三大平台的帳號、授權與維運常見問答，整理成可直接搜尋、可分享連結的索引頁。</p>
+    <div class="searchbar">
+      <span class="prompt mono">&gt;</span>
+      <input id="searchInput" type="text" placeholder="輸入關鍵字搜尋，例如：忘記密碼、DLP、續約、儲存空間…" autocomplete="off">
+      <span class="search-count mono" id="searchCount"></span>
+    </div>
+    <div class="chiprow" id="chipRow">
+      <div class="chip" data-vendor="all" data-active="true">全部平台</div>
+      <div class="chip" data-vendor="adobe" data-active="false"><span class="sw" style="background:var(--adobe)"></span>Adobe Creative Cloud</div>
+      <div class="chip" data-vendor="gws" data-active="false"><span class="sw" style="background:linear-gradient(90deg,var(--gws-a),var(--gws-c))"></span>Google Workspace</div>
+      <div class="chip" data-vendor="m365" data-active="false"><span class="sw" style="background:var(--m365)"></span>Microsoft 365</div>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+  <nav class="rail" id="rail"></nav>
+  <main id="main">
+    <div class="empty-state" id="emptyState">找不到符合「<span id="emptyQuery"></span>」的項目，換個關鍵字試試。</div>
+  </main>
+</div>
+
+<footer>本頁彙整自公司內部文件《Adobe / GWS / M365 常見問答與維運指南》，如條款或價格異動請以廠商官方公告為準。最後更新：2026 年 6 月。</footer>
+
+<div class="toast" id="toast">已複製連結</div>
+
+<script>
+const VENDORS = [
+  {
+    id:'adobe', name:'Adobe Creative Cloud', color:'var(--adobe)', tag:'ADOBE CC',
+    parts:[
+      { title:'帳號、登入與授權管理', items:[
+        {q:'Adobe CC 要怎麼登入？', a:'使用者需先從 Adobe 官方網站下載 Creative Cloud Desktop App，安裝完成後開啟程式，輸入註冊的 Adobe ID（通常為 Email）與密碼即可登入。若為企業版本，可能採用公司網域帳號（Federated ID），需透過公司 SSO（單一登入）驗證登入。此外，首次登入可能需要 Email 驗證或雙重驗證（MFA）來確保帳號安全。'},
+        {q:'忘記 Adobe 密碼怎麼辦？', a:'在登入頁面點選「忘記密碼」，輸入註冊信箱後，Adobe 會寄送重設密碼連結至信箱，依照指示設定新密碼即可。若為企業帳號，密碼通常由公司 IT 或身分驗證系統管理，需透過企業內部流程進行重設，例如 Azure AD 或其他 SSO 平台。'},
+        {q:'一個帳號可以幾台電腦使用？', a:'一個 Adobe 帳號可以安裝並登入在最多兩台裝置（Windows 或 Mac）上，但系統僅允許同時在一台裝置上使用。若您在第三台電腦登入，系統會提示您登出其他裝置。這樣的設計是為了兼顧使用便利性與授權合規性。'},
+        {q:'可以離線使用嗎？', a:'Adobe Creative Cloud 軟體大多支援短期離線使用，但系統會定期要求連線驗證授權，通常每隔數天至數週需連線一次。若長時間未連線，系統可能限制軟體使用，直到重新驗證成功。'},
+      ]},
+      { title:'軟體安裝與訂閱合約', items:[
+        {q:'Adobe 軟體在哪下載？', a:'Adobe Creative Cloud 的所有應用程式都需透過 Creative Cloud Desktop App 下載與管理。登入後即可看到完整應用程式清單，包括 Photoshop、Illustrator、Premiere Pro 等，使用者可依需求安裝、更新或移除軟體，並管理版本。'},
+        {q:'安裝失敗怎麼辦？', a:'若遇到安裝失敗，建議先檢查網路是否穩定，並確認電腦有足夠儲存空間。可嘗試重新啟動電腦、關閉防毒軟體或防火牆後再安裝。若問題持續，可使用 Adobe 官方提供的 Cleaner Tool 徹底清除殘留檔，再重新安裝。'},
+        {q:'Adobe CC 是買斷嗎？', a:'Adobe Creative Cloud 採訂閱制（Subscription-based），而非一次性買斷。使用者需按月或按年支付費用，訂閱期間可持續使用最新版本軟體、雲端服務及更新功能，確保工具始終維持最新狀態。'},
+        {q:'訂閱到期會怎樣？', a:'當訂閱到期後，使用者將無法繼續使用 Adobe 軟體功能，但已建立的檔案（例如 PSD、AI 檔）仍會保存在本機或雲端。重新訂閱後即可再次開啟與編輯這些檔案。'},
+        {q:'可以取消訂閱嗎？', a:'使用者可隨時透過 Adobe 帳戶管理頁面取消訂閱。若為月付方案可隨時終止；若為年約方案且提前終止，通常需支付剩餘期間一定比例的違約金，建議先確認合約條款。'},
+        {q:'需要更新嗎？', a:'Adobe 會定期推出新版本與安全更新，建議保持自動更新開啟，以確保軟體穩定性與安全性。部分企業也會控管版本更新以確保內部流程一致。'},
+        {q:'能用舊版本嗎？', a:'Creative Cloud 提供多個歷史版本可供下載，使用者可在 App 中選擇特定版本安裝，以確保與舊專案或外部合作夥伴版本相容。'},
+      ]},
+      { title:'企業管理與雲端資產', items:[
+        {q:'個人版與企業版差異？', a:'個人版適合單一使用者，功能完整但無集中管理；企業版（Teams 或 Enterprise）提供 Admin Console（管理主控台），可進行帳號管理、授權分配、使用者控管、資安設定與企業級技術支援，適合公司組織使用。'},
+        {q:'離職帳號如何處理？', a:'管理員可透過 Admin Console 將離職員工的授權回收並重新指派給新使用者。此外，企業版支援資料轉移功能，可保留該員工的雲端資產並交接給其他同事。'},
+        {q:'有雲端空間嗎？', a:'Adobe Creative Cloud 大多數方案包含雲端儲存空間（通常為 100 GB），使用者可儲存文件、設計稿與素材，並支援跨裝置同步與分享功能。'},
+        {q:'檔案會備份嗎？', a:'若檔案儲存在 Creative Cloud Files 或 Cloud Documents，系統會自動同步並備份至雲端，並保留版本紀錄，降低誤刪或損毀風險。'},
+      ]},
+    ]
+  },
+  {
+    id:'gws', name:'Google Workspace Business', color:'linear-gradient(90deg,var(--gws-a),var(--gws-c))', tag:'GWS',
+    parts:[
+      { title:'常見問題解答', items:[
+        {q:'Google Workspace Business 系列有哪三種授權版本？', a:'主要分為 Business Starter、Business Standard 以及 Business Plus 三種版本（皆適用於 300 人以下規模之企業）。'},
+        {q:'Business Starter 是否包含 Gemini AI？', a:'內含 Gemini AI，但功能限制最多。用戶每天僅可使用 5 個 Gemini Prompts（提示詞），且不支援網頁側邊欄功能。'},
+        {q:'Business Standard 內含哪些 Gemini 功能？', a:'包含 Gemini 網頁側邊欄、Meet AI 自動會議筆記、Deep Research（深度研究）、NotebookLM Plus、Slides 圖片生成以及 Sheets 數據資料分析等。'},
+        {q:'Business Plus 與 Business Standard 的差別？', a:'Business Plus 包含 Standard 的所有功能，並進一步強化資訊安全與 IT 管理機制，同時提供更完整的 Google Meet 進階會議能力。'},
+        {q:'哪些版本提供 Gemini 側邊欄？', a:'由 Business Standard 與 Business Plus 提供；Business Starter 版本則無配置此功能。'},
+        {q:'Business 方案是否具備 Help me write 功能？', a:'Business Standard 與 Business Plus 皆具備此功能，Business Starter 則無支援。'},
+        {q:'哪些版本可使用 Google Meet AI 自動筆記？', a:'Standard 與 Plus 版本可使用，Starter 版本不支援此功能。'},
+        {q:'是否所有 Business 版本都可使用 Gemini App？', a:'皆可使用。但 Starter 版本有每日 5 則的發問限制，其他版本則無限制。'},
+        {q:'是否需要額外購買 Gemini 加值套件？', a:'2025 年起，Google Workspace Business 方案已全面內建 Gemini AI 功能，企業不需要再額外購買加值套件。'},
+        {q:'若需要更強的 AI 功能應選哪一版？', a:'建議直升 Business Plus 版本，或增購企業級的 Gemini Business / Gemini Enterprise 專屬授權。'},
+        {q:'Google Workspace 與 Gmail 免費版有何差異？', a:'<ul><li>Gmail 免費版：主要面向個人用戶。</li><li>Google Workspace：提供企業級管理功能，包含自訂公司網域郵件（如 @company.com）、管理控制台（Admin Console）、全套雲端協作工具（Docs、Sheets、Slides、Meet）以及進階的安全與合規設定。</li></ul>'},
+        {q:'Business Starter、Standard、Plus 的核心差異？', a:'<ul><li>Starter：提供基本郵件服務與每位用戶約 30 GB 儲存空間。</li><li>Standard：提供每位用戶約 2 TB 儲存空間與 Google Meet 會議錄影功能。</li><li>Plus：大幅增加進階安全與合規機制（如 Google Vault 電子存證、DLP 資料外洩防護、端點防護管理），適合受法規遵循要求的企業。</li></ul>'},
+      ]},
+      { title:'商用版本功能比較表', table:{
+        title:'Business Starter / Standard / Plus 功能比較',
+        head:['比較功能項目','Business Starter','Business Standard','Business Plus'],
+        rows:[
+          ['雲端儲存空間','30 GB / 每用戶','2 TB / 每用戶','5 TB / 每用戶'],
+          ['Google Meet 人數限制','100 人','150 人','500 人'],
+          ['會議錄影功能','✕ 不支援','✓ 支援','✓ 支援'],
+          ['資訊安全防護等級','基本防護','中等防護','進階防護（含 DLP/Vault）'],
+          ['行動裝置管理（MDM）','基本管理','基本管理','進階端點管理'],
+        ]
+      }},
+    ]
+  },
+  {
+    id:'m365', name:'Microsoft 365', color:'var(--m365)', tag:'M365',
+    parts:[
+      { title:'三大核心方案介紹', items:[
+        {q:'Microsoft 365 授權主要分成哪三大類方案？', a:'Microsoft 365 的授權主要依「使用族群與企業規模」分成三大類方案：<ul><li>🏢 Business（中小企業）－適用對象：中小企業；人數上限：最多 300 人；常見方案：Business Basic、Business Standard、Business Premium；核心優勢：快速上線、成本效益高、管理簡化。</li><li>🌐 Enterprise（大型企業）－適用對象：中大型企業；人數上限：無上限；常見方案：Microsoft 365 E3 / E5、Office 365 E1 / E3 / E5；核心優勢：進階資安、合規、治理與企業級管理。</li><li>👷 Frontline（第一線員工）－適用對象：非辦公室型員工，如零售、製造、倉儲、現場支援；核心優勢：行動裝置存取、基本協作能力、較低授權成本。</li></ul>'},
+        {q:'Microsoft 365 Business 系列包含哪些授權？', a:'適合最多 300 名使用者，包含 Business Basic、Business Standard、Business Premium、Microsoft 365 Apps for business。'},
+        {q:'Microsoft 365 Enterprise 系列包含哪些授權？', a:'包含 Office 365 E1 / E3 / E5、Microsoft 365 F1 / F3、Microsoft 365 E3 / E5、Apps for enterprise，提供更強安全、合規及 AI 能力。'},
+      ]},
+      { title:'方案深度對比、合約與價格', items:[
+        {q:'Business Basic、Standard、Premium 的差別？', a:'<ul><li>Basic：雲端網頁版 Office。</li><li>Standard：包含 Office 桌面應用程式。</li><li>Premium：額外增加進階安全性與 Intune 裝置管理功能。</li></ul>'},
+        {q:'Enterprise E1 / E3 / E5 的差別？', a:'<ul><li>E1：提供核心雲端服務。</li><li>E3：含 Office 桌面應用程式與進階安全防護。</li><li>E5：提供最高級別的安全、合規功能與 Power BI Pro 數據分析。</li></ul>'},
+        {q:'Frontline（F1 / F3）適合哪些族群？', a:'適合不需要固定辦公桌的第一線員工，例如：零售門市、倉儲物流、現場技術支援人員。'},
+        {q:'Microsoft 365 是否可以買多年？', a:'<ul><li>Business 方案：目前只有一年期方案，沒有 3 年期版本。</li><li>Enterprise 方案：可以購買三年期（例如：Microsoft 365 E3 / E5）。</li></ul>'},
+        {q:'2026 年起哪些授權調整價格？', a:'自 2026 年 7 月 1 日起生效的價格調整如下：<ul><li>Business Basic：$6 → $7</li><li>Business Standard：$12.5 → $14</li><li>M365 E3：$36 → $39</li><li>M365 E5：$57 → $60</li></ul>'},
+        {q:'2026 年新增哪些 AI 與資安功能？', a:'<ul><li>AI 升級：Copilot Chat 深度整合 Word / Excel / PowerPoint / Outlook / OneNote。</li><li>資安強化：E3 / E5 方案新增 Defender P1 防護；Business 系列全面新增 URL 安全檢查機制。</li></ul>'},
+        {q:'超過 300 使用者可否購買 Business 方案？', a:'不行。Business 方案全家族的席位上限為 300 人，超過 300 人必須改採 Enterprise 授權。'},
+      ]},
+      { title:'安全、合規與 AI 進階功能', items:[
+        {q:'Microsoft 365 跟 Office 365 有什麼差別？', a:'<ul><li>Office 365：著重於 Office 應用程式與基本的雲端服務。</li><li>Microsoft 365：在此基礎上全面整合 Windows 作業系統與 Enterprise Mobility + Security（EMS）的安全與身分管理能力，適合需要整合安全、端點防護與合規治理的企業。</li></ul>'},
+        {q:'企業常見的 M365 授權是哪些？我要如何選？', a:'<ul><li>員工人數少於 300 人：推薦 Microsoft 365 Business（Basic / Standard / Premium）。</li><li>大型企業：推薦 Microsoft 365 E3 / E5（E5 包含最完整的安全與合規）。</li><li>AI 需求：Copilot for Microsoft 365 為附加授權。建議企業依安全需求、法規要求、使用者輪廓與預算進行綜合評估。</li></ul>'},
+        {q:'Copilot for Microsoft 365 是否包含在 M365 授權裡面？', a:'不包含。Copilot 為額外附加授權，需要另外購買，可加購在下列合格的基礎授權上：<ul><li>Microsoft 365 Business Standard / Premium</li><li>Microsoft 365 E3 / E5</li><li>Office 365 E3 / E5（需搭配必要條件）</li></ul>'},
+        {q:'Licensing 可否混搭？跨部門不同等級可以嗎？', a:'可以。同一租戶（Tenant）內可分配不同方案與附加授權。但需留意功能一致性與政策套用範圍（例如：E5 的 DLP / Defender 能力僅適用於被分配到該授權的使用者）。'},
+        {q:'Microsoft 365 如何保護資料外洩（DLP）？', a:'透過 Microsoft Purview DLP 在 Exchange、SharePoint / OneDrive、Teams 與端點（需結合 Intune / Defender）套用一致的規則；可檢測個資、財務與機敏標記並實施自動封鎖、加密、提示。建議企業先進行資料盤點與標記，再分階段套用策略。'},
+        {q:'Microsoft Defender 在 M365 內的角色是什麼？', a:'Microsoft Defender 提供跨端點的整合偵測與回應（XDR）服務：<ul><li>Defender for Office 365：防範釣魚郵件與惡意內容。</li><li>Defender for Endpoint：提供 EDR、弱點管理與攻擊面縮減。</li><li>Defender for Identity：監控 AD 身分威脅。</li></ul>註：M365 E5 套組所含防護最為完整。'},
+        {q:'Microsoft 365 如何滿足法規與稽核需求？', a:'Microsoft Purview 提供 eDiscovery、Legal Hold、審核記錄、記錄管理與資料生命週期管理；可設定保留策略與稽核事件供外部審查；特定敏感行業還可啟用通訊合規與資訊屏蔽等進階功能。'},
+      ]},
+      { title:'部署與管理實務', items:[
+        {q:'初次導入 M365 的建議路線圖？', a:'建議依循以下六大階段進行導入：<ul><li>身分與基礎：建置 Microsoft Entra ID、網域設定、條件式存取與 MFA 強制驗證。</li><li>郵件與檔案遷移：進行 Exchange Online 郵件轉移與 OneDrive / SharePoint 檔案搬遷。</li><li>安全與合規：設定 DLP 資料外洩防護、敏感度標籤與資料保留策略。</li><li>端點管理：進行 Intune 裝置註冊與安全性政策部署。</li><li>採用推廣：舉辦 Teams 教育訓練與 Copilot 團隊試點計畫。</li><li>營運與優化：分析使用報表、建立分層管理機制並持續進行權限調整。</li></ul>'},
+        {q:'Intune 能管理哪些裝置？', a:'支援 Windows、macOS、iOS / iPadOS、Android；可實施裝置合規檢查、組態配置、應用程式派送與條件式存取控制；搭配 Defender 能進一步強化端點防護與弱點管理。'},
+        {q:'多租戶或多地部署要注意什麼？', a:'<ul><li>法規面：需考量資料駐留（Data Residency）與各區域的合規限制。</li><li>架構面：注意命名原則、治理規範與 B2B / B2C 協作的外部分享政策。</li><li>管理面：建議設置全域與地區管理角色，並透過「基於群組的授權（Group-based licensing）」來簡化維運作業。</li></ul>'},
+        {q:'如何安全地與外部分享文件？', a:'<ul><li>檔案層級：使用敏感度標籤進行加密與權限控管，並結合 DLP 提示或直接封鎖。</li><li>權限限制：設定連結到期日、僅供檢視、禁止下載與自動浮水印。</li><li>外部協作：對外採用 B2B 來賓存取（Guest Access）機制，避免使用匿名公開連結以降低資料外洩風險。</li></ul>'},
+        {q:'Copilot 存取公司資料會不會造成外洩？', a:'Copilot 僅依現有權限存取資料，不會擴權或繞過 DLP 與敏感度標籤；治理與審計由 Purview / Governance 負責。推行前需完成資訊架構整頓、權限清理與策略配置。'},
+        {q:'Copilot 能帶來哪些生產力提升？', a:'在 Office 應用中可撰寫、摘要、改寫與製作投影片草稿；在 Excel 協助公式與分析；Outlook 郵件整理；Teams 會議摘要與行動項目；Loop/OneNote 用於專案整理與知識彙整。建議以部門場景測試量化成效。'},
+      ]},
+    ]
+  },
+];
+
+// ---------- build DOM ----------
+const railEl = document.getElementById('rail');
+const mainEl = document.getElementById('main');
+const emptyState = document.getElementById('emptyState');
+
+function slug(s){ return s.replace(/[^\w\u4e00-\u9fa5]+/g,'-').replace(/^-+|-+$/g,''); }
+
+let railHTML = '';
+let mainHTML = '';
+let counter = 0;
+
+VENDORS.forEach(v=>{
+  railHTML += `<div class="rail-group"><div class="rail-vendor"><span class="sw" style="background:${v.color}"></span>${v.name}</div>`;
+  mainHTML += `<section class="vendor-section" id="v-${v.id}" data-vendor="${v.id}">
+    <div class="vendor-head"><span class="sw" style="background:${v.color}"></span><h2>${v.name}</h2><span class="tag mono">${v.tag}</span></div>`;
+
+  v.parts.forEach((p,pi)=>{
+    const partId = `${v.id}-part-${pi}`;
+    railHTML += `<a class="rail-part" href="#${partId}" data-target="${partId}">${p.title}</a>`;
+    mainHTML += `<div class="part-group" id="${partId}"><p class="part-title">${p.title}</p>`;
+
+    if(p.table){
+      const t = p.table;
+      let rows = t.rows.map(r=>{
+        const cells = r.map((c,ci)=>{
+          if(ci===0) return `<td>${c}</td>`;
+          let cls = '';
+          if(c.indexOf('✓')===0) cls=' class="yes"';
+          if(c.indexOf('✕')===0) cls=' class="no"';
+          return `<td${cls}>${c}</td>`;
+        }).join('');
+        return `<tr>${cells}</tr>`;
+      }).join('');
+      mainHTML += `<div class="table-card" data-vendor="${v.id}" data-search="${(t.title+' '+t.rows.map(r=>r.join(' ')).join(' ')).toLowerCase()}">
+        <h4>${t.title}</h4>
+        <table><thead><tr>${t.head.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${rows}</tbody></table>
+      </div>`;
+    }
+
+    if(p.items){
+      p.items.forEach(item=>{
+        counter++;
+        const id = `${v.id}-q-${slug(item.q).slice(0,30)}-${counter}`;
+        const searchText = (item.q+' '+item.a.replace(/<[^>]+>/g,' ')).toLowerCase();
+        mainHTML += `<div class="qa-card" id="${id}" data-vendor="${v.id}" data-search="${searchText.replace(/"/g,'&quot;')}">
+          <div class="qa-top">
+            <span class="qa-id mono">${v.tag}</span>
+            <p class="qa-q">${item.q}</p>
+          </div>
+          <div class="qa-a">${item.a}</div>
+          <div class="qa-foot"><button class="copy-btn" data-id="${id}">🔗 複製連結</button></div>
+        </div>`;
+      });
+    }
+    mainHTML += `</div>`;
+  });
+  mainHTML += `</section>`;
+  railHTML += `</div>`;
+});
+
+railEl.innerHTML = railHTML;
+mainEl.insertAdjacentHTML('afterbegin', mainHTML);
+
+// ---------- search + filter ----------
+const searchInput = document.getElementById('searchInput');
+const searchCount = document.getElementById('searchCount');
+const emptyQuery = document.getElementById('emptyQuery');
+const chipRow = document.getElementById('chipRow');
+let activeVendor = 'all';
+
+function applyFilter(){
+  const q = searchInput.value.trim().toLowerCase();
+  let visibleCount = 0;
+
+  document.querySelectorAll('.qa-card, .table-card').forEach(card=>{
+    const matchesVendor = activeVendor==='all' || card.dataset.vendor===activeVendor;
+    const matchesQuery = q==='' || card.dataset.search.includes(q);
+    const show = matchesVendor && matchesQuery;
+    card.classList.toggle('hidden', !show);
+    if(show) visibleCount++;
+
+    // highlight
+    const qEl = card.querySelector('.qa-q');
+    if(qEl){
+      const original = qEl.dataset.orig || qEl.textContent;
+      qEl.dataset.orig = original;
+      if(q && matchesQuery){
+        const idx = original.toLowerCase().indexOf(q);
+        if(idx>=0){
+          qEl.innerHTML = original.slice(0,idx)+'<mark>'+original.slice(idx,idx+q.length)+'</mark>'+original.slice(idx+q.length);
+        } else {
+          qEl.textContent = original;
+        }
+      } else {
+        qEl.textContent = original;
+      }
+    }
+  });
+
+  // collapse empty groups
+  document.querySelectorAll('.part-group').forEach(g=>{
+    const anyVisible = g.querySelectorAll('.qa-card:not(.hidden), .table-card:not(.hidden)').length>0;
+    g.style.display = anyVisible ? '' : 'none';
+  });
+  document.querySelectorAll('.vendor-section').forEach(s=>{
+    const anyVisible = s.querySelectorAll('.qa-card:not(.hidden), .table-card:not(.hidden)').length>0;
+    s.style.display = anyVisible ? '' : 'none';
+  });
+
+  searchCount.textContent = q || activeVendor!=='all' ? `${visibleCount} 筆結果` : '';
+  emptyState.classList.toggle('show', visibleCount===0);
+  emptyQuery.textContent = searchInput.value.trim();
+}
+
+searchInput.addEventListener('input', applyFilter);
+
+chipRow.querySelectorAll('.chip').forEach(chip=>{
+  chip.addEventListener('click', ()=>{
+    activeVendor = chip.dataset.vendor;
+    chipRow.querySelectorAll('.chip').forEach(c=>c.dataset.active = (c===chip));
+    applyFilter();
+  });
+});
+
+// ---------- copy link ----------
+const toast = document.getElementById('toast');
+document.addEventListener('click', e=>{
+  const btn = e.target.closest('.copy-btn');
+  if(!btn) return;
+  const id = btn.dataset.id;
+  const url = window.location.href.split('#')[0] + '#' + id;
+  navigator.clipboard?.writeText(url).catch(()=>{});
+  history.replaceState(null,'','#'+id);
+  toast.classList.add('show');
+  setTimeout(()=>toast.classList.remove('show'), 1600);
+});
+
+// ---------- active rail highlight ----------
+const railLinks = Array.from(document.querySelectorAll('.rail-part'));
+const observer = new IntersectionObserver((entries)=>{
+  entries.forEach(entry=>{
+    const link = railLinks.find(l=>l.dataset.target===entry.target.id);
+    if(!link) return;
+    if(entry.isIntersecting){
+      railLinks.forEach(l=>l.classList.remove('active'));
+      link.classList.add('active');
+    }
+  });
+},{ rootMargin:'-160px 0px -70% 0px' });
+document.querySelectorAll('.part-group').forEach(g=>observer.observe(g));
+
+// open matching card if URL has hash on load
+window.addEventListener('DOMContentLoaded', ()=>{
+  if(location.hash){
+    const el = document.querySelector(location.hash);
+    if(el){ setTimeout(()=>el.scrollIntoView({behavior:'instant', block:'center'}), 50); }
+  }
+});
+</script>
+</body>
+</html>
